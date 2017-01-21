@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <style>
+      html, body, canvas {
+        margin: 0;
+        padding: 0;
+      }
+      .above {
+        position: absolute;
+        top: 1%;
+        left: 1%;
+        font-family: 'Helvetica Neue', Arial;
+        font-size: 0.6em
+      }
+
+      ul {padding-left: 0}
+
+      li {
+        display: inline;
+        list-style: none;
+      }
+
+      li a {
+        color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div class="above">
+      <h1>WebGL2 Particles with Transform Feedback</h1>
+      <p>Number of particles: <span id="nrPoints">-</span></p>
+      <ul>
+        <li><a href="?points=100000">100K</a></li>
+        <li><a href="?points=500000">500K</a></li>
+        <li><a href="?points=1000000">1M</a></li>
+        <li><a href="?points=2000000">2M</a></li>
+        <li><a href="?points=5000000">5M</a></li>
+      </ul>
+    </div>
+
+    <script src="libs/rStats.js"></script>
+    <script src="libs/helpers.js"></script>
+    <script src="shaders/calc_vertex.js"></script>
+    <script src="shaders/calc_empty_fragment.js"></script>
+    <script src="shaders/display_vertex.js"></script>
+    <script src="shaders/display_fragment.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
