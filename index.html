@@ -4,12 +4,12 @@
       html, body, canvas {
         margin: 0;
         padding: 0;
+        font-family: 'Helvetica Neue', Arial;
       }
       .above {
         position: absolute;
         top: 1%;
         left: 1%;
-        font-family: 'Helvetica Neue', Arial;
         font-size: 0.6em
       }
 
@@ -23,12 +23,22 @@
       li a {
         color: black;
       }
+
+      .no-webgl2 {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        text-align: center;
+        color: red;
+        font-size: 1em;
+        display: none;
+      }
     </style>
   </head>
   <body>
     <canvas id="canvas"></canvas>
     <div class="above">
-      <h1>WebGL2 Particles with Transform Feedback</h1>
+      <h1>WebGL2 Particles using Transform Feedback</h1>
       <p>Number of particles: <span id="nrPoints">-</span></p>
       <ul>
         <li><a href="?points=100000">100K</a></li>
@@ -38,6 +48,9 @@
         <li><a href="?points=5000000">5M</a></li>
       </ul>
     </div>
+    <div class="no-webgl2">
+      Your browser does not support WebGL2. Please download e.g. Chrome Canary.
+    <div>
 
     <script src="libs/rStats.js"></script>
     <script src="libs/helpers.js"></script>

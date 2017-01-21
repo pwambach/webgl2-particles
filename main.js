@@ -3,6 +3,11 @@ const gl = canvas.getContext('webgl2', {antialias: false});
 const rS = new rStats({CSSPath: 'libs/'});
 const mousePos = [0, 0];
 
+/* Check WebGL2 */
+if (!gl) {
+  document.querySelector('.no-webgl2').style.display = 'block';
+}
+
 /* Set number of points */
 const pointsEl = document.getElementById('nrPoints');
 const numberOfPoints = getJsonFromUrl().points
