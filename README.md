@@ -3,7 +3,9 @@
 A particle system using the new WebGL2 transform feedback feature.
 [Live Demo](https://pwambach.github.io/webgl2-particles)
 
-Video: ![](https://youtu.be/_0eMhb53GxM)
+https://youtu.be/-k128urhGvs
+
+[![Video](https://img.youtube.com/vi/-k128urhGvs)](https://www.youtube.com/watch?v=-k128urhGvs)
 
 
 
