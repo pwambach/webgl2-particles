@@ -20,6 +20,10 @@ canvas.addEventListener('mousemove', event => {
   mousePos[0] = event.clientX / canvas.width * 2 - 1;
   mousePos[1] = (event.clientY / canvas.height * 2 - 1) * -1;
 });
+canvas.addEventListener('touchmove', event => {
+  mousePos[0] = event.touches[0].clientX / canvas.width * 2 - 1;
+  mousePos[1] = (event.touches[0].clientY / canvas.height * 2 - 1) * -1;
+});
 
 /* Handle canvas size */
 function resize() {
@@ -33,6 +37,9 @@ resize();
 /* Use predefined attribute locations */
 const VERTEX_ATTRIBUTE_POS = 0;
 const VELOCITY_ATTRIBUTE_POS = 1;
+
+/* Set clear color */
+gl.clearColor(1.0, 1.0, 1.0, 1.0);
 
 /* Enable blending */
 gl.enable(gl.BLEND);
@@ -60,6 +67,18 @@ const velocityBuffers = [
   createBufferWithSize(numberOfPoints * 2 * 4)
 ];
 
+/* Create Velocity Buffer */
+const quadArray = new Float32Array([
+  -1.0, -1.0,
+  -1.0, 1.0,
+  1.0, 1.0,
+
+  1.0, 1.0,
+  1.0, -1.0,
+  -1.0, -1.0
+]);
+const quadBuffer = createBufferFromArray(quadArray);
+
 /* Create program with feedback */
 const programFeedback = createProgram(gl,
   vertexFeedbackShader,
@@ -71,11 +90,20 @@ const programFeedback = createProgram(gl,
 // get uniform location for mouse position
 const mousePosLocation = gl.getUniformLocation(programFeedback, "u_mouse");
 
-/* Create program to display particles */
+/* Create program to render particles */
 const programDisplay = createProgram(gl,
   vertexDisplayShader,
   fragmentDisplayShader
 );
+
+/* Create program to post process framebuffer */
+const programPost = createProgram(gl,
+  vertexPostShader,
+  fragmentPostShader
+);
+
+// get uniform location for texture
+const texLocation = gl.getUniformLocation(programPost, "tex");
 
 /* Create VAOs */
 const feedbackVAOs = [];
@@ -117,11 +145,22 @@ displayVAOs.push(createVAO([{
   elementSize: 2
 }]));
 
-/* Draw a VAO */
-function draw(vao) {
-  gl.bindVertexArray(vao);
-  gl.drawArrays(gl.POINTS, 0, numberOfPoints);
-}
+const postVAO = createVAO([{
+  data: quadBuffer,
+  location: VERTEX_ATTRIBUTE_POS,
+  elementSize: 2
+}]);
+
+/* Create empty textures for framebuffer */
+const texture = gl.createTexture();
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+/* Create a framebuffer and attach the texture */
+const framebuffer = gl.createFramebuffer();
 
 /* Create transform feedback */
 const transformFeedback = gl.createTransformFeedback();
@@ -140,7 +179,9 @@ function calculateFeedback(currentIndex) {
   gl.uniform2fv(mousePosLocation, mousePos);
 
   gl.beginTransformFeedback(gl.POINTS);
-  draw(feedbackVAOs[currentIndex]);
+  gl.bindVertexArray(feedbackVAOs[currentIndex]);
+  gl.drawArrays(gl.POINTS, 0, numberOfPoints);
+  gl.bindVertexArray(null);
   gl.endTransformFeedback();
 
   /* Re-activate rasterizer for next draw calls */
@@ -148,6 +189,34 @@ function calculateFeedback(currentIndex) {
 
   gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
   gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, null);
+}
+
+/* Draw result from feedback to framebuffer */
+function drawToFrameBuffer(index) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  gl.useProgram(programDisplay);
+  gl.bindVertexArray(displayVAOs[index]);
+  gl.drawArrays(gl.POINTS, 0, numberOfPoints);
+  gl.bindVertexArray(null);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+function drawQuad() {
+  gl.useProgram(programPost);
+
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  gl.uniform1i(texLocation, 0);
+  gl.bindVertexArray(postVAO);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+  gl.bindVertexArray(null);
 }
 
 /* Ping Pong index */
@@ -158,14 +227,13 @@ function loop() {
 
   const invertedIndex = invert(currentIndex);
 
-  gl.clearColor(1.0, 1.0, 1.0, 1.0);
+  calculateFeedback(currentIndex);
+  drawToFrameBuffer(invertedIndex);
+
   gl.clear(gl.CLEAR_COLOR_BIT);
 
-  calculateFeedback(currentIndex);
+  drawQuad();
 
-  // draw result from previous iteration
-  gl.useProgram(programDisplay);
-  draw(displayVAOs[invertedIndex]);
 
   // switch index for next iteration
   currentIndex = invert(currentIndex);
