@@ -10,8 +10,8 @@ const fragmentPostShader = `#version 300 es
 
     vec3 finalColor = texColor.rgb;
 
-    if (intensity > 0.5) {
-      finalColor.r *= 3.0;
+    if (intensity > 0.7) {
+      finalColor.r *= 4.0;
       finalColor.b *= finalColor.r;
       finalColor.g = 1.0 - finalColor.b;
       finalColor.r = 1.0 - finalColor.r * finalColor.g;
