@@ -6,18 +6,18 @@ const fragmentPostShader = `#version 300 es
 
   void main() {
     vec4 texColor = texture(tex, v_uv / 2.0 + 0.5);
+    color = texColor;
+
     float intensity = 1.0 - texColor.r;
 
-    vec3 finalColor = texColor.rgb;
-
-    if (intensity > 0.7) {
-      finalColor.r *= 4.0;
-      finalColor.b *= finalColor.r;
-      finalColor.g = 1.0 - finalColor.b;
-      finalColor.r = 1.0 - finalColor.r * finalColor.g;
-      finalColor.rgb = finalColor.brg;
+    if (intensity > 0.8) {
+      vec3 blendValues = vec3(
+        intensity,
+        smoothstep(0.82, 1.0, intensity),
+        smoothstep(0.95, 1.0, intensity)
+      );
+      vec3 highlightColor = mix(color.rgb, vec3(1.0), blendValues);
+      color = vec4(highlightColor, color.a);
     }
-
-    color = vec4(finalColor, 1.0);
   }
 `;
