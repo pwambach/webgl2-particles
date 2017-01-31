@@ -1,9 +1,0 @@
-{
-  "name": "webgl2-particles",
-  "scripts": {
-    "start": "serve ./content"
-  },
-  "dependencies": {
-    "serve": "^3.1.0"
-  }
-}
