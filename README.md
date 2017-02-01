@@ -1,7 +1,7 @@
 # WebGL2 Particles
 
 A particle system using the new WebGL2 transform feedback feature. Highlight colors are added in a second pass.
-[Live Demo](https://pwambach.github.io/webgl2-particles)
+[Live Demo](https://particles.now.sh)
 
 Video: ![](https://youtu.be/_0eMhb53GxM)
 
